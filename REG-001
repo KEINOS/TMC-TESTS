@@ -1,0 +1,85 @@
+#!/usr/bin/env php
+<?php
+/**
+ * REG-001:同一ディレクトリ内で目視上同じファイル名が重複しないこと（末尾にスペースがあるなど）
+ *
+ * 第１引数は、有効なディレクトリのパス、もしくは "-"（ハイフン）で、第１引数のみ受け付けます。
+ * 第１引数が "-" の場合は、標準入力からディレクトリのファイル名一覧を受け取ります。
+ */
+
+namespace TMC\REG001;
+
+const SUCCESS = 0; //終了ステータス：成功
+const FAILURE = 1; //終了ステータス：失敗（REGのIDと同じ）
+
+if (! isset($argv[1])) {
+    fputs(STDERR, 'Argument missing.' . PHP_EOL);
+    exit(FAILURE);
+}
+
+$path_dir_search = isset($argv[1]) ? $argv[1] : '';
+$is_input_stdin  = ($path_dir_search === '-') ?: false;
+
+if (! $is_input_stdin && ! is_dir($path_dir_search)) {
+    fputs(STDERR, 'Not a valid directory path.' . PHP_EOL);
+    fputs(STDERR, $path_dir_search . PHP_EOL);
+    exit(FAILURE);
+}
+
+if ($is_input_stdin) {
+    while ($name_file = fgets(STDIN)) {
+        if (is_duplicate($name_file)) {
+            fputs(STDERR, 'Duplicate directory found.' . PHP_EOL);
+            fputs(STDERR, $name_file . PHP_EOL);
+            exit(FAILURE);
+        }
+    }
+} else {
+    $dir = new \DirectoryIterator($path_dir_search);
+    foreach ($dir as $file) {
+        if (is_duplicate($file->getFileName())) {
+            fputs(STDERR, 'Duplicate directory found.' . PHP_EOL);
+            fputs(STDERR, $name_file . PHP_EOL);
+            exit(FAILURE);
+        }
+    }
+}
+
+exit(SUCCESS); // Test Passed
+
+function is_duplicate($string)
+{
+    static $list=[];
+
+    // 全角スペースのトリム
+    $string = mb_trim($string);
+    // 大文字と小文字を区別
+    $string = mb_strtolower($string);
+    // ゼロ幅スペースを削除
+    $string = remove_zwsp($string);
+    // 配列の添字を固定長
+    $hash   = substr(hash('sha256', $string), 0, 15);
+
+    if (isset($list[$hash])) {
+        return true;
+    }
+
+    $list[$hash] = true;
+    return false;
+}
+
+function mb_trim($string)
+{
+    static $chars = "[\\x0-\x20\x7F\xC2\xA0\xE3\x80\x80]";
+    return preg_replace("/\A{$chars}++|{$chars}++\z/u", '', $string);
+}
+
+function remove_zwsp($string)
+{
+    $string = str_replace('​', '', $string); //見せませんがZWSPが入っています
+    $string = str_replace('&#8203;', '', $string);
+    $string = str_replace("\xE2\x80\x8B", '', $string);
+    $string = str_replace("\xE2\x80\xAC","", $string);
+
+    return $string;
+}

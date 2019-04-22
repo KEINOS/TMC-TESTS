@@ -1,0 +1,174 @@
+#!/usr/bin/env php
+<?php
+/**
+ * REG-002 : ファイル名は `TFC-[YYYYMMDD].json` のフォーマットであること.
+ *
+ *  - 例: 2005/05/06 の場合は「`TMC-20050506.json`」（17文字）
+ *
+ *  - 半角英数字であること
+ *  - 接頭辞:「TMC-」
+ *  - 本体：
+ *      - `YYYY`: 西暦を 4 桁表示
+ *      - `MM`: 月を 2 桁表示（1 月は `01`）
+ *      - `DD`: 日を 2 桁表示（1 日は `01`）
+ *  - 拡張子は ".json"（小文字）
+ */
+
+namespace TMC\REG002;
+
+const SUCCESS = 0; //終了ステータス：成功
+const FAILURE = 2; //終了ステータス：失敗（REGのIDと同じ）
+const FILE_HEAD    = 'TMC-';     //接頭辞
+const FILE_TAIL    = '.json';    //拡張子
+const PATTERN_BODY = '[0-9]{8}'; //YYYYMMDD=8桁の数字
+const PATTERN_FILE = 'TMC-[0-9]{8}\.json';
+
+/* [Main] ----------------------------------------------------------------------- */
+
+if (! isset($argv[1])) {
+    print_error('Argument missing.' . PHP_EOL);
+    exit(FAILURE);
+}
+
+$name_files = isset($argv[1]) ? $argv[1] : '';
+$is_stdin   = ($name_files === '-') ?: false;
+$result     = true;
+
+if ($is_stdin) {
+    while ($name_file = fgets(STDIN)) {
+        $result = (is_uniformed_filename($name_file) && $result);
+    }
+} else {
+    $name_files = explode(PHP_EOL, $name_files);
+    foreach ($name_files as $name_file) {
+        $result = (is_uniformed_filename($name_file) && $result);
+    }
+}
+
+$exit_code = ($result) ? SUCCESS : FAILURE;
+
+exit($exit_code);
+
+/* [Functions]（ABC順）----------------------------------------------------------- */
+
+function has_no_zwsp($string_original){
+
+    $string_trimed = str_replace('​', '', $string_original);
+    $string_trimed = str_replace('&#8203;', '', $string_trimed);
+    $string_trimed = str_replace("\xE2\x80\x8B", '', $string_trimed);
+    $string_trimed = str_replace("\xE2\x80\xAC","", $string_trimed);
+
+    if($string_original === $string_trimed){
+        return true;
+    }
+
+    print_error('- File name contains ZWSP(Zero Width Space).');
+    print_error(' (Given input: ' . addslashes($string_original) . ')' . PHP_EOL);    
+    return false;
+}
+
+function is_alpha_numeric($string)
+{
+    $string_trimed = str_replace('.', '', $string, $count_dot);
+    $string_trimed = str_replace('-', '', $string_trimed, $count_hyphen);
+
+    if (ctype_alnum($string_trimed)) {
+        return true;
+    }
+
+    print_error('- Invalid format. Format: ' . PATTERN_FILE);
+    print_error(' (Given input: ' . addslashes($string) . ')' . PHP_EOL);
+    return false;
+}
+
+function is_body_date($string)
+{
+    $pattern = '/' . PATTERN_BODY . '/';
+    preg_match($pattern, $string, $matches, \PREG_OFFSET_CAPTURE);
+
+    if ($matches !== false && ! empty($matches)) {
+        return true;
+    }
+
+    print_error('- Invalid date format. Format: ' . PATTERN_BODY);
+    print_error(' (Given input: ' . addslashes($string) . ')' . PHP_EOL);
+
+    return false;
+}
+
+function is_head_tmc($string)
+{
+    $head_expect = FILE_HEAD;
+    $head_actual = substr($string, 0, strlen($head_expect));
+    $result      = ($head_expect === $head_actual);
+
+    if ($result) {
+        return true;
+    }
+
+    print_error('- File name must start with: ' . $head_expect);
+    print_error(' (Given input: ' . addslashes($string) . ')' . PHP_EOL);
+
+    if ($head_actual === strtolower($head_expect)) {
+        print_error('- File name header must be in upper case: ' . $head_expect);
+        print_error(' (Given input: ' . addslashes($string) . ')' . PHP_EOL);
+    }
+    return false;
+}
+
+function is_name_pattern_matched($string)
+{
+    $pattern = '/'. PATTERN_FILE . '/';
+    preg_match($pattern, $string, $matches, PREG_OFFSET_CAPTURE);
+    if ($matches !== false && ! empty($matches)) {
+        return true;
+    }
+
+    print_error('- Invalid format. Format: ' . PATTERN_FILE);
+    print_error(' (Given input: ' . addslashes($string) . ')' . PHP_EOL);
+    return false;
+}
+
+function is_tail_json($string)
+{
+    $tail_expect = FILE_TAIL;
+    $tail_actual = substr($string, strlen($tail_expect) * -1, strlen($tail_expect));
+    $result      = ($tail_expect === $tail_actual);
+
+    if ($result) {
+        return true;
+    }
+
+    print_error('- File name must end with: ' . $tail_expect);
+    print_error(' (Given input: ' . addslashes($string) . ')' . PHP_EOL);
+
+    if ($tail_actual === strtoupper($tail_expect)) {
+        print_error('- File extension must be in lower case: ' . $tail_expect);
+        print_error(' (Given input: ' . addslashes($string) . ')' . PHP_EOL);
+    }
+    return false;
+}
+
+function is_uniformed_filename($string)
+{
+    $string = trim($string);
+    $result = true;
+    if (! is_string($string)) {
+        print_error('Not a string.' . PHP_EOL);
+        return false;
+    }
+
+    // Check Requirements
+    $result = (is_alpha_numeric($string) && $result);
+    $result = (has_no_zwsp($string) && $result);
+    $result = (is_head_tmc($string) && $result);
+    $result = (is_tail_json($string) && $result);
+    $result = (is_body_date($string) && $result);
+    $result = (is_name_pattern_matched($string) && $result);
+
+    return $result;
+}
+
+function print_error($string){
+    fputs(STDERR, $string);
+}

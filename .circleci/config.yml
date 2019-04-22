@@ -1,0 +1,14 @@
+version: 2
+jobs:
+  build:
+    working_directory: /app
+    docker:
+      # Docker in docker base image (with git)
+      - image: phpunit/phpunit:latest
+    steps:
+      # Git clones the parent dir on host to /app
+      - checkout
+      # Docker in docker setup
+      - setup_remote_docker
+      # Run tests
+      - run: phpunit --version && cd /app/tests && phpunit 

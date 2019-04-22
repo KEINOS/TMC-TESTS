@@ -1,0 +1,24 @@
+language: php
+
+php:
+  # v5.6 Latest Stable
+  - 5.6.40
+  # v7.0 Latest Stable
+  - 7.0.33
+  # macOS HighSierra(10.13.6) and Mojave(OSX 10.14.4)
+  - 7.1.23
+  # v7.1 Latest Stable
+  - 7.1.28
+  # v7.2 latest Stable
+  - 7.2.17
+  # Current Stable 2019.04.04
+  - 7.3.4
+  # latest
+  - nightly
+install:
+  - if [[ $TRAVIS_PHP_VERSION = '7.0.33' ]]; then wget https://phar.phpunit.de/phpunit-6.phar -O ~/bin/phpunit && chmod +x $_; fi
+  - if [[ $TRAVIS_PHP_VERSION = '7.1.28' ]]; then wget https://phar.phpunit.de/phpunit-7.phar -O ~/bin/phpunit && chmod +x $_; fi
+  - if [[ $TRAVIS_PHP_VERSION = 'nightly' ]]; then sudo apt-get install libonig2 libonig-dev; fi
+
+script: php --version && phpunit --version && cd tests && phpunit
+

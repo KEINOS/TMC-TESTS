@@ -1,0 +1,44 @@
+#!/usr/bin/env php
+<?php
+/**
+ * REG-000: 仕様チェックのテンプレート
+ *
+ * 引数が "Hello World!" かを確認するだけです。動作チェックなどにお使いください。
+ */
+
+namespace TMC\REG000;
+
+$control = 'Hello World!';
+
+const SUCCESS = 0; //終了ステータス：成功
+const FAILURE = 1; //終了ステータス：失敗（REGのIDと同じ）
+
+if (! isset($argv[1])) {
+    print_error('NG (Missing argument)' . PHP_EOL);
+    exit(FAILURE);
+}
+
+$input = $argv[1];
+
+if ($input === null) {
+    print_error('NG (Null given.)' . PHP_EOL);
+    exit(FAILURE);
+}
+
+// Basic Test
+if ($control === $input) {
+    exit(SUCCESS); // Test Passed
+}
+
+// Other Tests
+if ($control === trim($input)) {
+    print_error("NG (Bad argument. Unnecessary space included. Given: '${input}')" . PHP_EOL);
+    exit(FAILURE);
+}
+
+print_error("NG (Bad argument. Must be 'Hello World!'. Given: '${input}')" . PHP_EOL);
+exit(1);
+
+function print_error($msg){
+    fputs(STDERR, addslashes($msg));
+}

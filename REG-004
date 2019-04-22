@@ -1,0 +1,28 @@
+#!/usr/bin/env php
+<?php
+/**
+ * REG-004 : ファイルは BOM なしであること
+ */
+
+if (! isset($argv[1])) {
+    echo 'NG (Missing argument)', PHP_EOL;
+    exit(1);
+}
+
+$input = $argv[1];
+
+if ($input === null) {
+    echo 'NG (Null given.)', PHP_EOL;
+    exit(1);
+}
+
+// Test
+$bom_utf8  = "\\xEF\\xBB\\xBF"; // BOM
+$input_bin = bin2hex($argv[1]);
+
+if (strpos($input_bin, $bom_utf8) !== 0) {
+    echo 'NG (Data has BOM)', PHP_EOL;
+    exit(1);
+}
+
+exit(0); // Test Passed
