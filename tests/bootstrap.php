@@ -7,21 +7,6 @@ const FAILURE = 1; //終了ステータス（失敗）
 
 class TestCase extends \PHPUnit\Framework\TestCase
 {
-/*
-    public function setUp()
-    {
-        // Warning も確実にエラーとして扱うようにする
-        set_error_handler(function ($errno, $errstr, $errfile, $errline) {
-            $msg  = 'Error #' . $errno . ': ';
-            $msg .= $errstr . " on line " . $errline . " in file " . $errfile;
-            throw new \RuntimeException($msg);
-        });
-    }
-    public function tearDown()
-    {
-        restore_error_handler();
-    }
-*/
     protected function getRealPathReg($name_file_command)
     {
         static $paths_file_reg;
@@ -33,25 +18,25 @@ class TestCase extends \PHPUnit\Framework\TestCase
         $path_dir_script = dirname(__FILE__);
         $path_dir_parent = dirname($path_dir_script);
 
-        $paths_file_reg[$name_file_command] = $path_dir_parent . DIR_SEP . $name_file_command;
+        $paths_file_reg[$name_file_command] = $path_dir_parent . \TMC\Sandbox\DIR_SEP . $name_file_command;
 
         return $paths_file_reg[$name_file_command];
     }
 
     protected function printError($msg)
     {
-        fputs(STDERR, addslashes($msg) . PHP_EOL);
+        fputs(\STDERR, addslashes($msg) . \PHP_EOL);
     }
 
     protected function continueIfPathIsFile($path_file_script)
     {
         if (! file_exists($path_file_script)) {
-            $this->printError('File not found at: ' . $path_file_script . PHP_EOL);
+            $this->printError('File not found at: ' . $path_file_script . \PHP_EOL);
             exit(FAILURE);
         }
 
         if (! is_file($path_file_script)) {
-            $this->printError('Path is not a file: ' . $path_file_script . PHP_EOL);
+            $this->printError('Path is not a file: ' . $path_file_script . \PHP_EOL);
             exit(FAILURE);
         }
         return true;
@@ -60,7 +45,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
     protected function continueIfArray($array)
     {
         if (! is_array($array)) {
-            $this->printError('Input data must be a array.' . PHP_EOL);
+            $this->printError('Input data must be a array.' . \PHP_EOL);
             exit(FAILURE);
         }
         return true;
@@ -70,12 +55,12 @@ class TestCase extends \PHPUnit\Framework\TestCase
     {
         $array = array_filter($array, 'strlen'); // Remove empty element
         $array = array_values($array);           // Renumber keys
-        return implode(PHP_EOL, $array);
+        return implode(\PHP_EOL, $array);
     }
 
     protected function explodeString($string)
     {
-        $lines = explode(PHP_EOL, $string);
+        $lines = explode(\PHP_EOL, $string);
         #$lines = array_filter($lines, 'strlen'); // Remove empty element
         #$lines = array_values($lines);           // Renumber keys
         return $lines;
@@ -93,9 +78,9 @@ class TestCase extends \PHPUnit\Framework\TestCase
     {
         $command   = $this->redirectStdOutToStdIn($command);
         $lastline  = exec($command, $output, $return_var);
-        $result    = empty($lastline) ? implode(PHP_EOL, $output) : $lastline;
-        $result_ok = ($return_var === 0) ? $result : '';
-        $result_ng = ($return_var === 0) ? '' : $result;
+        $result    = empty($lastline) ? implode(\PHP_EOL, $output) : $lastline;
+        $result_ok = ($return_var === SUCCESS) ? $result : '';
+        $result_ng = ($return_var === SUCCESS) ? '' : $result;
 
         return [
             'return_value' => $return_var,
@@ -136,14 +121,14 @@ class TestCase extends \PHPUnit\Framework\TestCase
         $command = $path_file_script . ' -'; // Add command option for STDIN
         $process = proc_open($command, $descriptor_spec, $pipes, $path_dir_parent);
         if (! is_resource($process)) {
-            $this->printError('Can not open command: ' . $path_file_script . PHP_EOL);
+            $this->printError('Can not open command: ' . $path_file_script . \PHP_EOL);
             return false;
         }
 
         #$lines = $this->implodeString($data);
 
         foreach ($data as $line) {
-            fwrite($pipes[0], $line . PHP_EOL); //Don't forget to line feed
+            fwrite($pipes[0], $line . \PHP_EOL); //Don't forget to line feed
         }
         fclose($pipes[0]);
 

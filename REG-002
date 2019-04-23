@@ -51,19 +51,19 @@ exit($exit_code);
 
 /* [Functions]（ABC順）----------------------------------------------------------- */
 
-function has_no_zwsp($string_original){
-
+function has_no_zwsp($string_original)
+{
     $string_trimed = str_replace('​', '', $string_original);
     $string_trimed = str_replace('&#8203;', '', $string_trimed);
     $string_trimed = str_replace("\xE2\x80\x8B", '', $string_trimed);
-    $string_trimed = str_replace("\xE2\x80\xAC","", $string_trimed);
+    $string_trimed = str_replace("\xE2\x80\xAC", "", $string_trimed);
 
-    if($string_original === $string_trimed){
+    if ($string_original === $string_trimed) {
         return true;
     }
 
     print_error('- File name contains ZWSP(Zero Width Space).');
-    print_error(' (Given input: ' . addslashes($string_original) . ')' . PHP_EOL);    
+    print_error(' (Given input: ' . addslashes($string_original) . ')' . PHP_EOL);
     return false;
 }
 
@@ -169,6 +169,7 @@ function is_uniformed_filename($string)
     return $result;
 }
 
-function print_error($string){
+function print_error($string)
+{
     fputs(STDERR, $string);
 }

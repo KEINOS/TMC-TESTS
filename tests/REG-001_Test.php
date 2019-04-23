@@ -4,11 +4,11 @@
  *
  * REG-001:同一ディレクトリ内で目視上同じファイル名が重複しないこと（末尾にスペースがあるなど）
  */
- namespace TMC\Sandbox\REG001;
 
-const DIR_SEP = \DIRECTORY_SEPARATOR;
-const SUCCESS = 0; // 実行ステータス 0 = 成功, 1 =< 失敗
-const FAILURE = 2; //実行ステータス 2 = 失敗（REG の ID）
+namespace TMC\Sandbox\REG001;
+
+const SUCCESS = 0; //実行ステータス 0 = 成功
+const FAILURE = 1; //実行ステータス 1 = 失敗（REG の ID）
 const REG_ID  = 'REG-001';
 
 class Reg001Test extends \TMC\Sandbox\TestCase
@@ -47,8 +47,8 @@ class Reg001Test extends \TMC\Sandbox\TestCase
         // データ・コンテナ
         $data_set = [];
         // 終了ステータス 0 = 成功, 0 < 失敗
-        $expect_ok = 0;
-        $expect_ng = 1;
+        $expect_ok = SUCCESS;
+        $expect_ng = FAILURE;
 
         // 標準テスト（既存ディレクトリでテスト）
         $path_dir_search = dirname(__FILE__);
@@ -79,8 +79,8 @@ class Reg001Test extends \TMC\Sandbox\TestCase
         // データ・コンテナ
         $data_set = [];
         // 終了ステータス 0 = 成功, 0 < 失敗
-        $expect_ok = 0;
-        $expect_ng = 1;
+        $expect_ok = SUCCESS;
+        $expect_ng = FAILURE;
 
         // 標準テスト
         $data_set['regular'] = [

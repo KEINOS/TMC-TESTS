@@ -39,6 +39,7 @@ if ($control === trim($input)) {
 print_error("NG (Bad argument. Must be 'Hello World!'. Given: '${input}')" . PHP_EOL);
 exit(1);
 
-function print_error($msg){
+function print_error($msg)
+{
     fputs(STDERR, addslashes($msg));
 }

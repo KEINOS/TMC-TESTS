@@ -1,7 +1,6 @@
 <?php
 namespace TMC\Sandbox\REG002;
 
-const DIR_SEP = \DIRECTORY_SEPARATOR;
 const SUCCESS = 0; //実行ステータス 0 = 成功
 const FAILURE = 2; //実行ステータス 2 = 失敗（REG の ID）
 const REG_ID  = 'REG-002';
