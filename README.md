@@ -79,6 +79,7 @@ test "./tests/REG-001.php" "$DATA"
 .
 ├── LICENSE
 ├── README.md      // このファイル
+├── Dockerfile     // 確認コマンドのみの Docker イメージを作ります
 ├── .circleci
 │   ├── config.yml
 │   └── run-ci-locally.sh // ローカルで CI テストを行うスクリプト
