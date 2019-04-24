@@ -68,8 +68,6 @@ class TestCase extends \PHPUnit\Framework\TestCase
 
     protected function openProcess($command, $data, $path_dir_work)
     {
-        $this->continueIfArray($data);
-
         $descriptor_spec = [
             0 => ["pipe", "r"], //STDIN
             1 => ["pipe", "w"], //STDOUT
@@ -87,24 +85,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
             ];
         }
 
-        foreach ($data as $line) {
-            fwrite($pipes[0], $line . \PHP_EOL); //Don't forget to line feed
-        }
-        fclose($pipes[0]);
-
-        $result_ok = stream_get_contents($pipes[1]);
-        fclose($pipes[1]);
-
-        $result_ng = stream_get_contents($pipes[2]);
-        fclose($pipes[2]);
-
-        $return_value = proc_close($process);
-
-        return [
-            'return_value' => $return_value,
-            'result_ok'    => $result_ok,
-            'result_ng'    => $result_ng,
-        ];
+        return $this->writeProcess($process, $data, $pipes);
     }
 
     protected function printError($msg)
@@ -151,8 +132,34 @@ class TestCase extends \PHPUnit\Framework\TestCase
         $path_dir_script = dirname($path_file_script);
         $path_dir_parent = dirname($path_dir_script);
 
-        $command = $path_file_script . ' -'; // Add command option for STDIN
+        $command = $path_file_script . ' -'; // Add command argument '-' as STDIN
 
         return $this->openProcess($command, $data, $path_dir_parent);
+    }
+
+    protected function writeProcess($process, $data, $pipes)
+    {
+        $this->continueIfArray($data);
+
+        foreach ($data as $line) {
+            fwrite($pipes[0], $line . \PHP_EOL); //Don't forget to line feed
+        }
+        fclose($pipes[0]);
+
+        $result_ok = stream_get_contents($pipes[1]);
+        fclose($pipes[1]);
+
+        $result_ng = stream_get_contents($pipes[2]);
+        fclose($pipes[2]);
+
+        $return_value = proc_close($process);
+
+        unset($process);
+
+        return [
+            'return_value' => $return_value,
+            'result_ok'    => $result_ok,
+            'result_ng'    => $result_ng,
+        ];
     }
 }
