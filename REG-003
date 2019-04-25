@@ -4,25 +4,64 @@
  * REG-003 : データは UTF-8 であること
  */
 
+namespace TMC\REG003;
+
+const SUCCESS = 0; //終了ステータス：成功
+const FAILURE = 3; //終了ステータス：失敗（REGのIDと同じ）
+
 if (! isset($argv[1])) {
-    echo 'NG (Missing argument)', PHP_EOL;
-    exit(1);
+    print_error('Argument missing.' . PHP_EOL);
+    exit(FAILURE);
 }
 
-$input = $argv[1];
-
-if ($input === null) {
-    echo 'NG (Null given.)', PHP_EOL;
-    exit(1);
+if (null === $argv[1]) {
+    print_error('NG (Null value given.)' . PHP_EOL);
+    exit(FAILURE);
 }
 
-// Test
-$control = '表示機能テスト'; //UTF-8 検知用テストデータ
-$encode  = mb_detect_encoding($input, 'UTF-8', true);
+$argument    = $argv[1];
+$is_stdin    = ($argument === '-') ?: false;
+$input_lines = [];
+$encoding_expected = 'UTF-8';
 
-if (false === mb_detect_encoding($input, 'UTF-8', true)) {
-    echo 'NG (Bad Encoding)', PHP_EOL;
-    exit(1);
+if ($is_stdin) {
+    while ($input_line = fgets(STDIN)) {
+        $input_lines[] = $input_line;
+    }
+} else {
+    $input_lines = explode(PHP_EOL, $argument);
 }
 
-exit(0); // Test Passed
+foreach ($input_lines as $line) {
+    if (3 < substr_count($line, '$')) {
+        print_error('NG (Bad Encoding). Too many $ found. Probably JIS/ISO-2022/CP5022x Encoding. Must be UTF-8.' . PHP_EOL);
+        exit(FAILURE);
+    }
+
+    if (false === mb_check_encoding($line, $encoding_expected)) {
+        print_error('NG (Bad Encoding). Fail check encoding. Must be UTF-8.' . PHP_EOL);
+        exit(FAILURE);
+    }
+
+    if (false === mb_detect_encoding($line, 'auto')) {
+        print_error('NG (Bad Encoding). Can not detect encode type.' . PHP_EOL);
+        exit(FAILURE);
+    }
+    
+    if (false === mb_convert_encoding($line, 'UTF-8', 'auto')) {
+        print_error('NG (Bad Encoding). Can not convert to UTF-8.' . PHP_EOL);
+        exit(FAILURE);
+    }
+    
+    if ($line !== mb_convert_encoding($line, 'UTF-8', 'auto')) {
+        print_error('NG (Bad Encoding). Fail convert encoding. Must be UTF-8.' . PHP_EOL);
+        exit(FAILURE);
+    }
+}
+
+exit(SUCCESS); // Test Passed
+
+function print_error($string)
+{
+    fputs(STDERR, $string);
+}

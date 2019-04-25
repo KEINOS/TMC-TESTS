@@ -9,7 +9,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
 {
     protected function addRedirectSTDERRtoSTDOUT($command)
     {
-        if (false === strpos($command, '2>&1')) {
+        if (false === strpos(str_replace(' ', '', $command), '2>&1')) {
             return trim($command) . ' ' . '2>&1';
         }
         return $command;
@@ -78,10 +78,12 @@ class TestCase extends \PHPUnit\Framework\TestCase
 
         if (! is_resource($process)) {
             proc_close($process);
+            $msg = 'Can not open command: ' . addslashes($command);
             return [
                 'return_value' => false,
                 'result_ok'    => '',
-                'result_ng'    => 'Can not open command: ' . addslashes($command),
+                'result_ng'    => $msg,
+                'result_msg'   => $msg,
             ];
         }
 
@@ -95,16 +97,18 @@ class TestCase extends \PHPUnit\Framework\TestCase
 
     protected function runCommand($command)
     {
-        $command   = $this->addRedirectSTDERRtoSTDOUT($command);
-        $lastline  = exec($command, $output, $return_var);
-        $result    = empty($lastline) ? implode(\PHP_EOL, $output) : $lastline;
-        $result_ok = ($return_var === SUCCESS) ? $result : '';
-        $result_ng = ($return_var === SUCCESS) ? '' : $result;
+        $command    = $this->addRedirectSTDERRtoSTDOUT($command);
+        $lastline   = exec($command, $output, $return_var);
+
+        $result_msg = empty($lastline) ? implode(\PHP_EOL, $output) : $lastline;
+        $result_ok  = ($return_var === SUCCESS) ? $result_msg : '';
+        $result_ng  = ($return_var === SUCCESS) ? '' : $result_msg;
 
         return [
             'return_value' => $return_var,
             'result_ok'    => $result_ok,
             'result_ng'    => $result_ng,
+            'result_msg'   => $result_msg,
         ];
     }
 
@@ -160,6 +164,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
             'return_value' => $return_value,
             'result_ok'    => $result_ok,
             'result_ng'    => $result_ng,
+            'result_msg'   => trim($result_ok) . trim($result_ng),
         ];
     }
 }
