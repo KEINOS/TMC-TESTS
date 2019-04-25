@@ -1,6 +1,6 @@
 # REG-XXX Script Requirements
 
-確認コマンド（`REG-XXX`　のスクリプト）作成の要件。
+確認コマンド（`REG-XXX` のスクリプト）作成の要件。
 
 ## 入力（検証データの受け取り）
 
