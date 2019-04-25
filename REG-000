@@ -1,27 +1,38 @@
 #!/usr/bin/env php
 <?php
+namespace TMC\REG000;
 /**
  * REG-000: 仕様チェックのテンプレート
  *
  * 引数が "Hello World!" かを確認するだけです。動作チェックなどにお使いください。
  */
 
-namespace TMC\REG000;
+$msg_help = <<< EOL
+Usage: REG-000 [OPTIONS][STRING]
+
+データが Hello World! であるか検証します。
+
+Options:
+  -     検証する文字列を引数でなく標準入力から受け取ります。
+String:
+        検証する文字列を指定します。
+
+EOL;
 
 $control = 'Hello World!';
 
 const SUCCESS = 0; //終了ステータス：成功
-const FAILURE = 1; //終了ステータス：失敗（REGのIDと同じ）
+const FAILURE = 1; //終了ステータス：失敗
 
 if (! isset($argv[1])) {
-    print_error('NG (Missing argument)' . PHP_EOL);
+    print_help();
     exit(FAILURE);
 }
 
 $input = $argv[1];
 
 if ($input === null) {
-    print_error('NG (Null given.)' . PHP_EOL);
+    print_error('NG (Null given).' . PHP_EOL);
     exit(FAILURE);
 }
 
@@ -38,6 +49,12 @@ if ($control === trim($input)) {
 
 print_error("NG (Bad argument. Must be 'Hello World!'. Given: '${input}')" . PHP_EOL);
 exit(1);
+
+function print_help()
+{
+    global $msg_help;
+    print_error(PHP_EOL . trim($msg_help) . PHP_EOL . PHP_EOL);
+}
 
 function print_error($msg)
 {

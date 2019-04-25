@@ -1,19 +1,26 @@
 #!/usr/bin/env php
 <?php
+namespace TMC\REG001;
 /**
- * REG-001:同一ディレクトリ内で目視上同じファイル名が重複しないこと（末尾にスペースがあるなど）
- *
- * 第１引数は、有効なディレクトリのパス、もしくは "-"（ハイフン）で、第１引数のみ受け付けます。
- * 第１引数が "-" の場合は、標準入力からディレクトリのファイル名一覧を受け取ります。
+ * REG-001:目視上、同じファイル名が重複しないか検証します。
  */
 
-namespace TMC\REG001;
+$msg_help = <<< EOL
+Usage: REG-001 [OPTIONS] PATHS
+
+受け取った「改行区切りの文字列」（PATHS）で、目視上同じ行がないか検証します。ファイル名が重複しないかなどの検証に使います。
+
+Options:
+  -     検証する文字列（PATHS）を引数でなく標準入力から受け取ります。
+Paths:
+        検証する文字列（PATHS）を指定します。文字列全体をクォートで囲うのを忘れないようにしてください。
+EOL;
 
 const SUCCESS = 0; //終了ステータス：成功
 const FAILURE = 1; //終了ステータス：失敗（REGのIDと同じ）
 
 if (! isset($argv[1])) {
-    fputs(STDERR, 'Argument missing.' . PHP_EOL);
+    print_help();
     exit(FAILURE);
 }
 
@@ -21,16 +28,16 @@ $path_dir_search = isset($argv[1]) ? $argv[1] : '';
 $is_input_stdin  = ($path_dir_search === '-') ?: false;
 
 if (! $is_input_stdin && ! is_dir($path_dir_search)) {
-    fputs(STDERR, 'Not a valid directory path.' . PHP_EOL);
-    fputs(STDERR, $path_dir_search . PHP_EOL);
+    print_error('Not a valid directory path.' . PHP_EOL);
+    print_error($path_dir_search . PHP_EOL);
     exit(FAILURE);
 }
 
 if ($is_input_stdin) {
     while ($name_file = fgets(STDIN)) {
         if (is_duplicate($name_file)) {
-            fputs(STDERR, 'Duplicate directory found.' . PHP_EOL);
-            fputs(STDERR, $name_file . PHP_EOL);
+            print_error('Duplicate directory found.' . PHP_EOL);
+            print_error($name_file . PHP_EOL);
             exit(FAILURE);
         }
     }
@@ -38,8 +45,8 @@ if ($is_input_stdin) {
     $dir = new \DirectoryIterator($path_dir_search);
     foreach ($dir as $file) {
         if (is_duplicate($file->getFileName())) {
-            fputs(STDERR, 'Duplicate directory found.' . PHP_EOL);
-            fputs(STDERR, $name_file . PHP_EOL);
+            print_error('Duplicate directory found.' . PHP_EOL);
+            print_error($name_file . PHP_EOL);
             exit(FAILURE);
         }
     }
@@ -74,9 +81,19 @@ function mb_trim($string)
     return preg_replace("/\A{$chars}++|{$chars}++\z/u", '', $string);
 }
 
+function print_error($msg)
+{
+    fputs(STDERR, addslashes($msg));
+}
+
+function print_help(){
+    global $msg_help;
+    print_error(PHP_EOL . trim($msg_help) . PHP_EOL . PHP_EOL);
+}
+
 function remove_zwsp($string)
 {
-    $string = str_replace('​', '', $string); //見せませんがZWSPが入っています
+    $string = str_replace('​', '', $string); //見えませんが ZWSP が入っています
     $string = str_replace('&#8203;', '', $string);
     $string = str_replace("\xE2\x80\x8B", '', $string);
     $string = str_replace("\xE2\x80\xAC","", $string);

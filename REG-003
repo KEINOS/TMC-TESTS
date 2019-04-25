@@ -1,16 +1,26 @@
 #!/usr/bin/env php
 <?php
+namespace TMC\REG003;
 /**
  * REG-003 : データは UTF-8 であること
  */
 
-namespace TMC\REG003;
+$msg_help = <<< EOL
+Usage: REG-003 [OPTIONS] STRING
+
+受け取った文字列が UTF-8 であるか検証します。
+
+Options:
+  -     検証する文字列を引数でなく標準入力から受け取ります。
+Strings:
+        検証する文字列を指定します。
+EOL;
 
 const SUCCESS = 0; //終了ステータス：成功
 const FAILURE = 3; //終了ステータス：失敗（REGのIDと同じ）
 
 if (! isset($argv[1])) {
-    print_error('Argument missing.' . PHP_EOL);
+    print_help();
     exit(FAILURE);
 }
 
@@ -60,6 +70,12 @@ foreach ($input_lines as $line) {
 }
 
 exit(SUCCESS); // Test Passed
+
+function print_help()
+{
+    global $msg_help;
+    print_error(PHP_EOL . trim($msg_help) . PHP_EOL . PHP_EOL);
+}
 
 function print_error($string)
 {

@@ -1,20 +1,33 @@
 #!/usr/bin/env php
 <?php
+namespace TMC\REG002;
 /**
  * REG-002 : ファイル名は `TFC-[YYYYMMDD].json` のフォーマットであること.
- *
- *  - 例: 2005/05/06 の場合は「`TMC-20050506.json`」（17文字）
- *
- *  - 半角英数字であること
- *  - 接頭辞:「TMC-」
- *  - 本体：
- *      - `YYYY`: 西暦を 4 桁表示
- *      - `MM`: 月を 2 桁表示（1 月は `01`）
- *      - `DD`: 日を 2 桁表示（1 日は `01`）
- *  - 拡張子は ".json"（小文字）
  */
 
-namespace TMC\REG002;
+$msg_help = <<< EOL
+Usage: REG-002 [OPTIONS] STRING
+
+受け取った文字列が TFC-[YYYYMMDD].json のフォーマットであるか検証します。ファイル名などの検証に使います。フォーマットは下記 Format 参照。
+
+Options:
+  -     検証する文字列を引数でなく標準入力から受け取ります。
+Strings:
+        検証する文字列を指定します。
+
+Format:
+  * 半角英数字であること
+  * 接頭辞:「TMC-」（大文字であること）
+  * 本体：
+    * `YYYY`: 西暦を 4 桁表示
+    * `MM`: 月を 2 桁表示（1 月は `01`）
+    * `DD`: 日を 2 桁表示（1 日は `01`）
+ * 拡張子： .json（小文字であること）
+
+例:
+  2005/05/06 の場合は「`TMC-20050506.json`」（17文字）
+     
+EOL;
 
 const SUCCESS = 0; //終了ステータス：成功
 const FAILURE = 2; //終了ステータス：失敗（REGのIDと同じ）
@@ -26,7 +39,7 @@ const PATTERN_FILE = 'TMC-[0-9]{8}\.json';
 /* [Main] ----------------------------------------------------------------------- */
 
 if (! isset($argv[1])) {
-    print_error('Argument missing.' . PHP_EOL);
+    print_help();
     exit(FAILURE);
 }
 
@@ -167,6 +180,12 @@ function is_uniformed_filename($string)
     $result = (is_name_pattern_matched($string) && $result);
 
     return $result;
+}
+
+function print_help()
+{
+    global $msg_help;
+    print_error(PHP_EOL . trim($msg_help) . PHP_EOL . PHP_EOL);
 }
 
 function print_error($string)
