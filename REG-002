@@ -2,13 +2,15 @@
 <?php
 namespace TMC\REG002;
 /**
- * REG-002 : ファイル名は `TFC-[YYYYMMDD].json` のフォーマットであること.
+ * TMC-[YYYYMMDD].json　のフォーマットであるか検証します（REG-002）.
+ * 
+ * REG-002: ファイル名は `TMC-[YYYYMMDD].json` のフォーマットであること.
  */
 
 $msg_help = <<< EOL
 Usage: REG-002 [OPTIONS] STRING
 
-受け取った文字列が TFC-[YYYYMMDD].json のフォーマットであるか検証します。ファイル名などの検証に使います。フォーマットは下記 Format 参照。
+受け取った文字列が TMC-[YYYYMMDD].json のフォーマットであるか検証します。ファイル名などの検証に使います。フォーマットは下記 Format 参照。
 
 Options:
   -     検証する文字列を引数でなく標準入力から受け取ります。

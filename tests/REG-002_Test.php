@@ -1,9 +1,14 @@
 <?php
 namespace TMC\Sandbox\REG002;
+/**
+ * REG-002 の動作確認テスト.
+ * 
+ * REG-002: ファイル名は `TFC-[YYYYMMDD].json` のフォーマットであること
+ */
 
+const REG_ID  = 'REG-002';
 const SUCCESS = 0; //実行ステータス 0 = 成功
 const FAILURE = 2; //実行ステータス 2 = 失敗（REG の ID）
-const REG_ID  = 'REG-002';
 
 class Reg002Test extends \TMC\Sandbox\TestCase
 {
@@ -36,11 +41,12 @@ class Reg002Test extends \TMC\Sandbox\TestCase
      */
     public function dataProvider()
     {
-        // データ・コンテナ
-        $data_set = [];
         // 終了ステータス 0 = 成功, 0 < 失敗
         $expect_ok = SUCCESS;
         $expect_ng = FAILURE;
+
+        // データ・セット初期化
+        $data_set = [];
 
         // 標準テスト
         $data_set['regular'] = [

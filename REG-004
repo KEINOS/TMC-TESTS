@@ -1,7 +1,7 @@
 #!/usr/bin/env php
 <?php
 /**
- * REG-004 : ファイルは BOM なしであること
+ * REG-004: ファイルは BOM なしであること
  */
 
 if (! isset($argv[1])) {

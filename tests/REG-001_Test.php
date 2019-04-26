@@ -1,15 +1,14 @@
 <?php
+namespace TMC\Sandbox\REG001;
 /**
- * REG-001 の動作テスト.
+ * REG-001 の動作確認テスト.
  *
- * REG-001:同一ディレクトリ内で目視上同じファイル名が重複しないこと（末尾にスペースがあるなど）
+ * REG-001: 同一ディレクトリ内で目視上同じファイル名が重複しないこと（末尾にスペースや不可視文字が含まれるなど）
  */
 
-namespace TMC\Sandbox\REG001;
-
+const REG_ID  = 'REG-001';
 const SUCCESS = 0; //実行ステータス 0 = 成功
 const FAILURE = 1; //実行ステータス 1 = 失敗（REG の ID）
-const REG_ID  = 'REG-001';
 
 class Reg001Test extends \TMC\Sandbox\TestCase
 {
@@ -44,21 +43,22 @@ class Reg001Test extends \TMC\Sandbox\TestCase
      */
     public function dataProvider()
     {
-        // データ・コンテナ
-        $data_set = [];
         // 終了ステータス 0 = 成功, 0 < 失敗
         $expect_ok = SUCCESS;
         $expect_ng = FAILURE;
 
+        // データ・セット初期化
+        $data_set = [];
+
         // 標準テスト
-        $data_set['regular'] = [
+        $data_set['Regular'] = [
             $this->getListFilesAsString(),
             $expect_ok
         ];
 
         // 完全同一名のテスト
-        $data_set['exact same file name'] = [
-            $this->implodeWithSingleQuote(PHP_EOL, [
+        $data_set['Exact same file name'] = [
+            $this->implodeAsString([
                 'LICENSE',
                 'LICENSE', //Duplicate
             ]),
@@ -66,8 +66,8 @@ class Reg001Test extends \TMC\Sandbox\TestCase
         ];
 
         // 大文字小文字の違い
-        $data_set['case sensitive'] = [
-            $this->implodeWithSingleQuote(PHP_EOL, [
+        $data_set['Case sensitive'] = [
+            $this->implodeAsString([
                 'LICENSE',
                 'LICENse', //Duplicate
             ]),
@@ -75,8 +75,8 @@ class Reg001Test extends \TMC\Sandbox\TestCase
         ];
 
         // 全角スペース
-        $data_set['multi bite spaces'] = [
-            $this->implodeWithSingleQuote(PHP_EOL, [
+        $data_set['Multi bite spaces'] = [
+            $this->implodeAsString([
                 'LICENSE',
                 'LICENSE　', //Duplicate
             ]),
@@ -84,8 +84,8 @@ class Reg001Test extends \TMC\Sandbox\TestCase
         ];
 
         // 半角スペース
-        $data_set['spaces before and after'] = [
-            $this->implodeWithSingleQuote(PHP_EOL, [
+        $data_set['Spaces before and after'] = [
+            $this->implodeAsString([
                 'LICENSE',
                 ' LICENSE ', //Duplicate
             ]),
@@ -93,8 +93,8 @@ class Reg001Test extends \TMC\Sandbox\TestCase
         ];
 
         // ZWSP（文字列内にゼロ幅スペース）
-        $data_set['zero width sapce in between'] = [
-            $this->implodeWithSingleQuote(PHP_EOL, [
+        $data_set['Zero width sapce in between'] = [
+            $this->implodeAsString([
                 'SAMPLE',
                 'SAM​P​LE', //Duplicate
             ]),
@@ -102,8 +102,8 @@ class Reg001Test extends \TMC\Sandbox\TestCase
         ];
 
         // ZWSP（文字列の前後ゼロ幅スペース）
-        $data_set['zero width sapce before and after'] = [
-            $this->implodeWithSingleQuote(PHP_EOL, [
+        $data_set['Zero width sapce before and after'] = [
+            $this->implodeAsString([
                 'SAMPLE',
                 '​SAMPLE​', //Duplicate
             ]),
@@ -116,8 +116,8 @@ class Reg001Test extends \TMC\Sandbox\TestCase
     /**
      * implode 時にエスケープする
      */
-    public function implodeWithSingleQuote($glue, $array){
-        return implode($glue, $array);
+    public function implodeAsString($array){
+        return implode(PHP_EOL, $array);
     }
 
     /**
@@ -133,6 +133,6 @@ class Reg001Test extends \TMC\Sandbox\TestCase
             $list_files[] = $file->getFilename();
         }
 
-        return $this->implodeWithSingleQuote(PHP_EOL, $list_files);
+        return $this->implodeAsString($list_files);
     }
 }

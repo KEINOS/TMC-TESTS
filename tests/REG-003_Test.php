@@ -1,13 +1,14 @@
 <?php
-/**
- * Test for REG-003.
- * REG-003 : データは UTF-8 であること
- */
 namespace TMC\Sandbox\REG003;
+/**
+ * REG-003 の動作確認テスト.
+ * 
+ * REG-003: データは UTF-8 であること
+ */
 
+const REG_ID  = 'REG-003';
 const SUCCESS = 0; //実行ステータス 0 = 成功
 const FAILURE = 3; //実行ステータス 3 = 失敗（REG の ID）
-const REG_ID  = 'REG-003';
 
 class Reg003Test extends \TMC\Sandbox\TestCase
 {
@@ -40,8 +41,6 @@ class Reg003Test extends \TMC\Sandbox\TestCase
      */
     public function dataProvider()
     {
-        // データ・コンテナ
-        $data_set = [];
         // 終了ステータス 0 = 成功, 0 < 失敗
         $expect_ok = SUCCESS;
         $expect_ng = FAILURE;
@@ -49,7 +48,8 @@ class Reg003Test extends \TMC\Sandbox\TestCase
         $control = 'これは表示機能テスト用のテキスト・データです。';
 
         // テストデータの作成
-        $list_encode = $this->getListEncode();
+        $data_set = []; // データ・セット初期化
+        $list_encode = $this->getListEncoding();
         foreach ($list_encode as $encode) {
             $expect   = ($encode === 'UTF-8') ? $expect_ok : $expect_ng;
             $name_key = ($encode === 'UTF-8') ? 'regular data' : 'irregular data';
@@ -66,7 +66,7 @@ class Reg003Test extends \TMC\Sandbox\TestCase
         return $data_set;
     }
 
-    private function getListEncode()
+    private function getListEncoding()
     {
         return [
             'UTF-8',

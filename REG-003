@@ -2,7 +2,9 @@
 <?php
 namespace TMC\REG003;
 /**
- * REG-003 : データは UTF-8 であること
+ * 文字列が UTF-8 であるか検証します（REG-003）.
+ * 
+ * REG-003: データは UTF-8 であること
  */
 
 $msg_help = <<< EOL
