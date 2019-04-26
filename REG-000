@@ -2,9 +2,7 @@
 <?php
 namespace TMC\REG000;
 /**
- * REG-000: 仕様チェックのテンプレート
- *
- * 引数が "Hello World!" かを確認するだけです。動作チェックなどにお使いください。
+ * REG-000: 確認コマンドのサンプル（テンプレート）
  */
 
 $msg_help = <<< EOL
@@ -30,6 +28,15 @@ if (! isset($argv[1])) {
 }
 
 $input = $argv[1];
+
+// Receive via STDIN (overwrite $input)
+if ('-' === $input){
+    $lines = '';
+    while ($line = fgets(STDIN)) {
+        $lines .= $line . PHP_EOL;
+    }
+    $input = trim($lines, PHP_EOL);
+}
 
 if ($input === null) {
     print_error('NG (Null given).' . PHP_EOL);
