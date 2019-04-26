@@ -1,6 +1,7 @@
 #!/usr/bin/env php
 <?php
 namespace TMC\REG001;
+
 /**
  * REG-001:目視上、同じファイル名が重複しないか検証します。
  */
@@ -13,7 +14,7 @@ Usage: REG-001 [OPTIONS] PATHS
 Options:
   -     検証する文字列（PATHS）を引数でなく標準入力から受け取ります。
 Paths:
-        検証する文字列（PATHS）を指定します。文字列全体をクォートで囲うのを忘れないようにしてください。
+        検証する文字列（PATHS）を指定します。改行区切りの文字列全体をクォートで囲うのを忘れないようにしてください。
 EOL;
 
 const SUCCESS = 0; //終了ステータス：成功
@@ -24,31 +25,21 @@ if (! isset($argv[1])) {
     exit(FAILURE);
 }
 
-$path_dir_search = isset($argv[1]) ? $argv[1] : '';
-$is_input_stdin  = ($path_dir_search === '-') ?: false;
-
-if (! $is_input_stdin && ! is_dir($path_dir_search)) {
-    print_error('Not a valid directory path.' . PHP_EOL);
-    print_error($path_dir_search . PHP_EOL);
-    exit(FAILURE);
-}
+$lines_from_argv = $argv[1];
+$is_input_stdin  = ($lines_from_argv === '-') ?: false;
 
 if ($is_input_stdin) {
-    while ($name_file = fgets(STDIN)) {
-        if (is_duplicate($name_file)) {
-            print_error('Duplicate directory found.' . PHP_EOL);
-            print_error($name_file . PHP_EOL);
-            exit(FAILURE);
-        }
+    while ($line = fgets(STDIN)) {
+        $lines[] = $line;
     }
 } else {
-    $dir = new \DirectoryIterator($path_dir_search);
-    foreach ($dir as $file) {
-        if (is_duplicate($file->getFileName())) {
-            print_error('Duplicate directory found.' . PHP_EOL);
-            print_error($name_file . PHP_EOL);
-            exit(FAILURE);
-        }
+    $lines = explode(PHP_EOL, $lines_from_argv);
+}
+
+foreach ($lines as $line){
+    if (is_duplicate($line)) {
+        print_error('Duplicate line found:' . $line . PHP_EOL);
+        exit(FAILURE);
     }
 }
 
@@ -78,7 +69,10 @@ function is_duplicate($string)
 function mb_trim($string)
 {
     static $chars = "[\\x0-\x20\x7F\xC2\xA0\xE3\x80\x80]";
-    return preg_replace("/\A{$chars}++|{$chars}++\z/u", '', $string);
+    $string = preg_replace("/\A{$chars}++|{$chars}++\z/u", '', $string);
+    $string = str_replace(' ', '', $string);
+
+    return $string;
 }
 
 function print_error($msg)
@@ -86,7 +80,8 @@ function print_error($msg)
     fputs(STDERR, addslashes($msg));
 }
 
-function print_help(){
+function print_help()
+{
     global $msg_help;
     print_error(PHP_EOL . trim($msg_help) . PHP_EOL . PHP_EOL);
 }
@@ -96,7 +91,6 @@ function remove_zwsp($string)
     $string = str_replace('​', '', $string); //見えませんが ZWSP が入っています
     $string = str_replace('&#8203;', '', $string);
     $string = str_replace("\xE2\x80\x8B", '', $string);
-    $string = str_replace("\xE2\x80\xAC","", $string);
-
+    $string = str_replace("\xE2\x80\xAC", "", $string);
     return $string;
 }

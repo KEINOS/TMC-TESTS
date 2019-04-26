@@ -61,8 +61,10 @@ class TestCase extends \PHPUnit\Framework\TestCase
 
     protected function implodeArray(array $array)
     {
-        $array = array_filter($array, 'strlen'); // Remove empty element
-        $array = array_values($array);           // Renumber keys
+        // Remove empty element and renumbr keys.
+        // Comment out below in order to give data as is
+        //$array = array_filter($array, 'strlen');
+        //$array = array_values($array);
         return implode(\PHP_EOL, $array);
     }
 
@@ -100,7 +102,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
         $command    = $this->addRedirectSTDERRtoSTDOUT($command);
         $lastline   = exec($command, $output, $return_var);
 
-        $result_msg = empty($lastline) ? implode(\PHP_EOL, $output) : $lastline;
+        $result_msg = empty(trim($lastline)) ? implode(\PHP_EOL, $output) : $lastline;
         $result_ok  = ($return_var === SUCCESS) ? $result_msg : '';
         $result_ng  = ($return_var === SUCCESS) ? '' : $result_msg;
 
@@ -143,11 +145,11 @@ class TestCase extends \PHPUnit\Framework\TestCase
 
     protected function writeProcess($process, $data, $pipes)
     {
-        $this->continueIfArray($data);
-
-        foreach ($data as $line) {
-            fwrite($pipes[0], $line . \PHP_EOL); //Don't forget to line feed
+        if(is_array($data)){
+            $data = $this->implodeArray($data);
         }
+
+        fwrite($pipes[0], $data);
         fclose($pipes[0]);
 
         $result_ok = stream_get_contents($pipes[1]);
